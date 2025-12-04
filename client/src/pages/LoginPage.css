@@ -1,0 +1,142 @@
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: #f5f6fa;
+}
+
+/* ===== PAGE WRAPPER ===== */
+.login-container {
+  width: 1440px;
+  min-height: 100vh;
+  background: linear-gradient(to right, #ff8f00, #ff6f00);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+
+  position: relative;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  padding: 40px 35px;
+  border-radius: 18px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.5s ease;
+
+  /* thêm margin để tránh dính lề trên/dưới */
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-title {
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 10px;
+  color: #222;
+}
+
+.login-sub {
+  text-align: center;
+  color: #777;
+  margin-bottom: 25px;
+}
+
+/* ===== FORM INPUT ===== */
+.form-group {
+  margin-bottom: 18px;
+}
+
+label {
+  font-size: 14px;
+  color: #444;
+  font-weight: 600;
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  margin-top: 6px;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  outline: none;
+  transition: 0.25s;
+}
+
+.input-field:focus {
+  border-color: #ff6f00;
+  box-shadow: 0px 0px 6px rgba(255, 111, 0, 0.35);
+}
+
+/* ===== LOGIN BUTTON ===== */
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  background: #ff6f00;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.25s;
+  margin-top: 5px;
+}
+
+.login-btn:hover {
+  background: #ff8f33;
+  transform: scale(1.02);
+}
+
+/* ===== ERROR MESSAGE ===== */
+.error-msg {
+  color: red;
+  margin-bottom: 12px;
+  text-align: center;
+  font-size: 15px;
+}
+
+/* ===== LINK STYLE ===== */
+.login-link {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.login-link a {
+  color: #ff6f00;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+  .login-box {
+    padding: 25px;
+  }
+
+  .login-title {
+    font-size: 23px;
+  }
+}
