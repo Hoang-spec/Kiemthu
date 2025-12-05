@@ -51,7 +51,7 @@ function App() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/product/:id" element={<ProductDetailPage />} />
         
-        {/* SỬ DỤNG PROTECTED ROUTE CHO CHECKOUT */}
+
         <Route path="/checkout" element={<ProtectedRoute element={CheckoutPage} />} />
       </Routes>
       </Router>
