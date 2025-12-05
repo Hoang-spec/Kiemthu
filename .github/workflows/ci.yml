@@ -7,18 +7,26 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-    name: Build Backend + Frontend
+  build_test: # Đổi tên Job thành build_test
+    name: Build & Test Fullstack
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Nên nâng cấp lên v4
 
-      # 2. Setup Node.js (cho Backend và Frontend)
+      # 1. BƯỚC MỚI: Cache node_modules (giúp CI chạy nhanh hơn)
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4 # Nên nâng cấp lên v4
         with:
           node-version: 18
 
@@ -27,23 +35,13 @@ jobs:
         working-directory: ./server
         run: npm install
 
-      - name: Build Backend (nếu có lệnh build)
+      - name: Build Backend (Optional)
         working-directory: ./server
-        run: |
-          if npm run | grep -q "build"; then
-            npm run build
-          else
-            echo "Không có lệnh build backend"
-          fi
+        run: npm run build --if-present # Tối ưu hóa lệnh build
 
-      - name: Test Backend (nếu có)
+      - name: Test Backend
         working-directory: ./server
-        run: |
-          if npm run | grep -q "test"; then
-            npm test
-          else
-            echo "Không có test backend"
-          fi
+        run: npm test --if-present # Sử dụng --if-present để tránh lỗi nếu không có test
 
       # ===== FRONTEND =====
       - name: Install Frontend Dependencies
@@ -54,11 +52,6 @@ jobs:
         working-directory: ./client
         run: npm run build
 
-      - name: Test Frontend (nếu có)
+      - name: Test Frontend
         working-directory: ./client
-        run: |
-          if npm run | grep -q "test"; then
-            npm test
-          else
-            echo "Không có test frontend"
-          fi
+        run: npm test --if-present # Sử dụng --if-present
