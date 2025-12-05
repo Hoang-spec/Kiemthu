@@ -1,0 +1,64 @@
+name: Fullstack CI (NodeJS + React)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build Backend + Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Setup Node.js (cho Backend và Frontend)
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # ===== BACKEND =====
+      - name: Install Backend Dependencies
+        working-directory: ./server
+        run: npm install
+
+      - name: Build Backend (nếu có lệnh build)
+        working-directory: ./server
+        run: |
+          if npm run | grep -q "build"; then
+            npm run build
+          else
+            echo "Không có lệnh build backend"
+          fi
+
+      - name: Test Backend (nếu có)
+        working-directory: ./server
+        run: |
+          if npm run | grep -q "test"; then
+            npm test
+          else
+            echo "Không có test backend"
+          fi
+
+      # ===== FRONTEND =====
+      - name: Install Frontend Dependencies
+        working-directory: ./client
+        run: npm install
+
+      - name: Build Frontend
+        working-directory: ./client
+        run: npm run build
+
+      - name: Test Frontend (nếu có)
+        working-directory: ./client
+        run: |
+          if npm run | grep -q "test"; then
+            npm test
+          else
+            echo "Không có test frontend"
+          fi

@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # -------------------- 1. DATABASE --------------------
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    volumes:
+      # Sử dụng volume để lưu trữ dữ liệu DB bền vững
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+    environment:
+      # Tùy chọn: Thêm biến môi trường cho xác thực DB nếu cần
+      MONGO_INITDB_DATABASE: ecommerce_test_db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # -------------------- 2. BACKEND API --------------------
+  server:
+    container_name: node-server
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    volumes:
+      # Mount volume để đồng bộ code (phát triển)
+      - ./server:/usr/src/app
+      - /usr/src/app/node_modules # Ngoại trừ node_modules
+    ports:
+      - "5000:5000"
+    environment:
+      # Truy cập DB bằng tên service 'mongodb'
+      MONGODB_URI: mongodb://mongodb:27017/ecommerce_test_db
+      PORT: 5000
+    depends_on:
+      - mongodb
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # -------------------- 3. FRONTEND CLIENT --------------------
+  client:
+    container_name: react-client
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    volumes:
+      # Mount volume để đồng bộ code (phát triển)
+      - ./client:/usr/src/app
+      - /usr/src/app/node_modules # Ngoại trừ node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      # Đảm bảo frontend trỏ đúng vào server
+      VITE_API_URL: http://localhost:5000
+    depends_on:
+      - server
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # -------------------- 4. TESTING (CYPRESS E2E) --------------------
+  cypress-test:
+    container_name: cypress-runner
+    image: cypress/included:13.6.0 # Sử dụng image Cypress có sẵn
+    working_dir: /e2e
+    volumes:
+      # Mount toàn bộ dự án để Cypress có thể đọc tests và chạy lệnh
+      - .:/e2e
+      # Mount volume Cypress cache
+      - cypress-cache:/root/.cache/Cypress
+    depends_on:
+      - client # Đợi frontend sẵn sàng
+    environment:
+      # Cấu hình BASE URL cho Cypress
+      CYPRESS_BASE_URL: http://client:5173
+      # Sử dụng entrypoint để chạy các tests
+    entrypoint: 
+      - /bin/sh 
+      - -c
+      - |
+        # Đảm bảo services khác đã chạy hoàn toàn
+        sleep 5
+        # Chạy Cypress ở chế độ không đầu (headless)
+        cypress run --spec "cypress/e2e/*"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "2"
+
+
+# Định nghĩa Volumes
+volumes:
+  mongo-data: # Lưu trữ dữ liệu MongoDB
+  cypress-cache: # Cache của Cypress (để chạy nhanh hơn)
