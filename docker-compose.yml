@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # --- 1. DATABASE SERVICE (Thêm mới) ---
+  mongo:
+    image: mongo:6.0
+    container_name: ecommerce-mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db # Lưu dữ liệu để không bị mất khi tắt container
+    networks:
+      - app-network
+
+  # --- 2. BACKEND SERVICE ---
+  # --- 2. BACKEND SERVICE ---
+  backend:
+    container_name: ecommerce-backend
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      # [SỬA LẠI TÊN BIẾN CHO KHỚP VỚI CODE]
+      - MONGO_URL=mongodb://mongo:27017/ecommerce_test_db
+      - JWT_SECRET=khoa_bi_mat_cua_ban_123
+    volumes:
+      - ./logs/backend:/app/logs
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --- 3. FRONTEND SERVICE ---
+  frontend:
+    container_name: ecommerce-frontend
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  # --- 4. TESTER SERVICE ---
+  tester:
+    container_name: ecommerce-tester
+    build:
+      context: ./api_tests
+      dockerfile: Dockerfile
+    # Bỏ environment TARGET_URL vì bạn đã hardcode trong python
+    volumes:
+      - ./logs/tester:/app/logs
+      - ./reports:/app/reports
+      - ./tests:/app
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - app-network
+    # Lệnh chạy test
+    command: ["pytest", "--html=/app/reports/report.html", "--self-contained-html"]
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo_data: # Khai báo volume cho mongodb
