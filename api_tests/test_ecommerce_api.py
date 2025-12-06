@@ -147,8 +147,7 @@ def test_10_register_user_validation_short_password_failure():
     endpoint = f"{BASE_URL}/auth/register"
     invalid_user = {**TEST_USER, "email": f"invalid{int(time.time())}@e.com", "password": "abc"}
     response = requests.post(endpoint, json=invalid_user)
-    
-    # Phải trả về 400 BAD REQUEST nếu logic validation hoạt động
+ 
     assert response.status_code == 400
     # Kiểm tra thông báo lỗi
     assert "6 ký tự" in response.json()["message"]
